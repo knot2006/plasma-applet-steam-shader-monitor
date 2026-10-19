@@ -1,0 +1,21 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "knot",
+                "Email": "knotesoft@gmail.com"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "Monitors background Steam Vulkan shader compilation progress",
+        "Icon": "steam",
+        "Id": "org.kde.plasma.steamshaders",
+        "License": "MIT",
+        "Name": "Steam Shader Monitor",
+        "Version": "1.0.0",
+        "Website": "https://github.com/knot2006/plasma-applet-steam-shader-monitor"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-MainScript": "ui/main.qml"
+}
