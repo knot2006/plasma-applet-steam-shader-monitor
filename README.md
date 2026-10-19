@@ -1,38 +1,47 @@
-# Steam Shader Monitor (KDE Plasma 6 Widget)
+<div align="center">
+  <img src="logo.png" alt="Steam Shader Monitor Logo" width="140" />
+  <h1>Steam Shader Monitor</h1>
+  <p><strong>A lightweight KDE Plasma 6 widget monitoring background Steam Vulkan shader compilation.</strong></p>
 
-A lightweight KDE Plasma 6 widget that monitors background Steam Vulkan shader pre-caching and compilation (`fossilize_replay`).
-
-![KDE Plasma 6](https://img.shields.io/badge/KDE%20Plasma-6.x-blue.svg)
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+  <p>
+    <img src="https://img.shields.io/badge/KDE%20Plasma-6.x-blue.svg" alt="KDE Plasma 6" />
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" />
+  </p>
+</div>
 
 ---
 
-## Why this widget?
+## Overview
 
-When Steam downloads Vulkan shader pre-caching archives, it processes and compiles the pipelines in the background across your CPU threads via `fossilize_replay`. Steam's GUI gives little to no visibility into this background work once downloads complete: the Downloads queue clears to 0 while your CPU quietly works on shaders.
+When Steam downloads Vulkan shader pre-caching packages, it processes and compiles the pipelines in the background across your CPU threads using `fossilize_replay`. Steam's GUI gives little to no visibility into this work once network downloads finish: the Downloads queue clears to 0 while your CPU is heavily compiling.
 
-**Steam Shader Monitor** bridges this gap by providing real-time visibility straight from your KDE panel.
+**Steam Shader Monitor** brings full visibility right to your KDE panel, status tray, or desktop.
+
+<div align="center">
+  <img src="screenshot-active.png" alt="Steam Shader Monitor - Active Compilation" width="48%" />
+  <img src="screenshot-idle.png" alt="Steam Shader Monitor - Idle" width="48%" />
+</div>
 
 ---
 
 ## Features
 
-- **Panel Indicator:**
-  - **Idle:** Dimmed Steam icon when no shader jobs are running.
-  - **Active:** Lights up with real-time percentage completion (e.g., `Steam 75%`).
-- **Hover Tooltip:** Shows the currently compiling game title and pipeline counts.
-- **Click Popup:** Expands an informative dashboard:
-  - Game Name & Steam App ID
-  - Live animated progress bar
-  - Compiled vs. remaining pipeline counts
+- **Panel & System Tray Indicator:**
+  - **Idle:** Dimmed Steam icon when no shader compilation is running.
+  - **Active:** Lights up with live percentage completion (e.g., `Steam 74%`).
+- **Hover Tooltip:** Shows the currently compiling game title and pipeline counts at a glance.
+- **Click Popup Dashboard:**
+  - Real game title (e.g., *Overwatch 2*, *HELLDIVERS™ 2*) & Steam App ID
+  - Smooth animated progress bar
+  - Compiled vs. total pipeline counts
   - Active CPU thread count allocated to Fossilize
-- **Lightweight & Fast:** Pure QML frontend calling a fast (~30ms) Python helper that parses Steam's local logs and process table without CPU overhead.
+- **Lightweight & Efficient:** Pure QML frontend calling a fast (~30ms) Python helper that inspects Steam's local logs and process table without CPU overhead.
 
 ---
 
 ## Requirements
 
-- **KDE Plasma 6** (`plasma5support` enabled, standard on Plasma 6)
+- **KDE Plasma 6**
 - **Python 3**
 - **Steam** (Native Linux client)
 
@@ -40,7 +49,7 @@ When Steam downloads Vulkan shader pre-caching archives, it processes and compil
 
 ## Installation
 
-### Method 1: Using `kpackagetool6`
+### Method 1: Using `kpackagetool6` (Recommended)
 
 ```bash
 git clone https://github.com/knot2006/plasma-applet-steam-shader-monitor.git
@@ -55,15 +64,15 @@ kpackagetool6 -t Plasma/Applet -u .
 
 ### Method 2: Manual Installation
 
-Copy or symlink the folder into your local Plasma plasmoids directory:
+Copy into your local Plasma plasmoids directory:
 
 ```bash
 mkdir -p ~/.local/share/plasma/plasmoids/
 cp -r plasma-applet-steam-shader-monitor ~/.local/share/plasma/plasmoids/org.kde.plasma.steamshaders
 ```
 
-Then restart or add the widget:
-1. Right-click your KDE panel or desktop &rarr; **Add Widgets...**
+Then add the widget:
+1. Right-click your KDE panel or desktop &rarr; **Add Widgets...** (or enter Edit Mode).
 2. Search for **Steam Shader Monitor**.
 3. Drag and drop it onto your panel or system tray.
 
@@ -103,4 +112,4 @@ if os.path.exists("/tmp/steam_shader_mock.json"):
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) © Knot
