@@ -18,6 +18,9 @@ When Steam downloads Vulkan shader pre-caching packages, it processes and compil
 **Steam Shader Monitor** brings full visibility right to your KDE panel, status tray, or desktop.
 
 <div align="center">
+  <p><strong>Panel & Taskbar Integration (Live Active State)</strong></p>
+  <img src="screenshot-taskbar.png" alt="Steam Shader Monitor - Taskbar Integration" width="100%" />
+  <br /><br />
   <img src="screenshot-active.png" alt="Steam Shader Monitor - Active Compilation" width="48%" />
   <img src="screenshot-idle.png" alt="Steam Shader Monitor - Idle" width="48%" />
 </div>
