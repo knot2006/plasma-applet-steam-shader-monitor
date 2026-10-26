@@ -62,19 +62,24 @@ PlasmoidItem {
         repeat: true
         triggeredOnStart: true
         onTriggered: {
-            var scriptPath = Qt.resolvedUrl("../scripts/check_shaders.py").toString().replace("file://", "")
-            shaderSource.connectSource("python3 " + scriptPath)
+            var scriptPath = decodeURIComponent(Qt.resolvedUrl("../scripts/check_shaders.py").toString().replace("file://", ""))
+            shaderSource.connectSource("python3 '" + scriptPath.replace(/'/g, "'\\''") + "'")
         }
     }
 
     compactRepresentation: MouseArea {
         id: compactRoot
+        implicitWidth: compactLayout.implicitWidth
+        implicitHeight: compactLayout.implicitHeight
+        Layout.minimumWidth: implicitWidth
+        Layout.minimumHeight: implicitHeight
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton
         onClicked: root.expanded = !root.expanded
 
         RowLayout {
+            id: compactLayout
             anchors.centerIn: parent
             spacing: Kirigami.Units.smallSpacing
 
@@ -195,6 +200,13 @@ PlasmoidItem {
             }
 
             Item { Layout.fillHeight: true }
+
+            PlasmaComponents.Label {
+                text: "v" + Plasmoid.metaData.version
+                font.pointSize: Kirigami.Theme.smallFont.pointSize
+                opacity: 0.6
+                Layout.alignment: Qt.AlignRight
+            }
         }
     }
 }

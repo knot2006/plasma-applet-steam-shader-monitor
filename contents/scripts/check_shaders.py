@@ -4,6 +4,18 @@ import sys
 import re
 import subprocess
 import json
+from datetime import datetime
+
+
+def process_start_time(pid):
+    try:
+        with open(f"/proc/{pid}/stat") as f:
+            start_ticks = int(f.read().rsplit(")", 1)[1].split()[19])
+        with open("/proc/stat") as f:
+            boot_time = next(int(line.split()[1]) for line in f if line.startswith("btime "))
+        return boot_time + start_ticks / os.sysconf("SC_CLK_TCK")
+    except (OSError, ValueError, IndexError, StopIteration):
+        return None
 
 def check():
     mock_file = "/tmp/steam_shader_mock.json"
@@ -14,7 +26,7 @@ def check():
         except Exception:
             pass
 
-    p = subprocess.run(["pgrep", "-af", "fossilize_replay"], capture_output=True, text=True)
+    p = subprocess.run(["pgrep", "-u", str(os.getuid()), "-af", "fossilize_replay"], capture_output=True, text=True)
     if p.returncode != 0:
         return {
             "active": False,
@@ -26,15 +38,21 @@ def check():
             "status": "Idle"
         }
 
+    command = next((line for line in p.stdout.splitlines() if re.search(r"shadercache/\d+/", line)), "")
+    started_at = process_start_time(command.split()[0]) if command else None
     threads = 0
-    tm = re.search(r"--num-threads\s+(\d+)", p.stdout)
+    tm = re.search(r"--num-threads\s+(\d+)", command)
     if tm:
         threads = int(tm.group(1))
 
-    m_cmd = re.search(r"shadercache/(\d+)/", p.stdout)
+    m_cmd = re.search(r"shadercache/(\d+)/", command)
     cmd_appid = m_cmd.group(1) if m_cmd else ""
 
-    log_file = os.path.expanduser("~/.local/share/Steam/logs/shader_log.txt")
+    roots = [os.path.expanduser(path) for path in (
+        "~/.steam/root", "~/.steam/steam", "~/.local/share/Steam", "~/.steam/debian-installation"
+    )]
+    steam_root = next((path for path in roots if os.path.isdir(path)), roots[2])
+    log_file = os.path.join(steam_root, "logs", "shader_log.txt")
     app_id = cmd_appid
     percent = 0
     counts = ""
@@ -44,16 +62,27 @@ def check():
             with open(log_file, "rb") as f:
                 f.seek(max(0, os.path.getsize(log_file) - 16384))
                 content = f.read().decode("utf-8", "ignore")
-                matches = re.findall(r"replaying (\d+)\s*\(([\d]+)%(?:,\s*([^)]+))?\)", content)
-                if matches:
-                    app_id, pct_str, counts = matches[-1]
-                    percent = int(pct_str)
+                matches = re.findall(r"\[([^\]]+)\][^\n]*?replaying (\d+)\s*\((\d+)%(?:,\s*([^)]+))?\)", content)
+                for timestamp, logged_appid, pct_str, logged_counts in reversed(matches):
+                    if logged_appid != app_id or started_at is None:
+                        continue
+                    try:
+                        logged_at = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S").timestamp()
+                    except ValueError:
+                        continue
+                    # Steam timestamps have second precision; reject progress from older runs.
+                    if logged_at >= int(started_at):
+                        percent = int(pct_str)
+                        counts = logged_counts
+                        break
         except Exception:
             pass
 
     game_title = app_id
-    lib_vdf = os.path.expanduser("~/.local/share/Steam/config/libraryfolders.vdf")
-    library_paths = [os.path.expanduser("~/.local/share/Steam")]
+    library_paths = [steam_root]
+    lib_vdf = next((os.path.join(steam_root, folder, "libraryfolders.vdf")
+                    for folder in ("steamapps", "config")
+                    if os.path.isfile(os.path.join(steam_root, folder, "libraryfolders.vdf"))), "")
     if os.path.exists(lib_vdf):
         try:
             with open(lib_vdf, "r", errors="ignore") as f:

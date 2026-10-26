@@ -112,6 +112,22 @@ if os.path.exists("/tmp/steam_shader_mock.json"):
 
 ---
 
+## Development checks
+
+Run the regression tests from the repository root:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+The helper tests use temporary Steam installations and simulated process output. The headless UI tests require PyQt6 and the KDE QML modules; they are skipped when PyQt6 is unavailable. They cover command quoting, compact panel sizing, and loading the active and idle popup views.
+
+To check the complete QML file:
+
+```bash
+qmllint contents/ui/main.qml
+```
+
 ## License
 
 [MIT](LICENSE) © Knot
