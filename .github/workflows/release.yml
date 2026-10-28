@@ -12,7 +12,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
-      PACKAGE_FILE: org.kde.plasma.steamshaders.plasmoid
+      PACKAGE_FILE: org.kde.plasma.steamshaders-${{ github.ref_name }}.plasmoid
     steps:
       - uses: actions/checkout@v7
         with:
