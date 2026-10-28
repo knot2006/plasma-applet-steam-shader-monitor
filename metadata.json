@@ -13,7 +13,7 @@
         "Id": "org.kde.plasma.steamshaders",
         "License": "MIT",
         "Name": "Steam Shader Monitor",
-        "Version": "1.1",
+        "Version": "1.2",
         "Website": "https://github.com/knot2006/plasma-applet-steam-shader-monitor"
     },
     "X-Plasma-API-Minimum-Version": "6.0",
