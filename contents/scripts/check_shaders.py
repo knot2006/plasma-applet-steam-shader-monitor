@@ -74,6 +74,12 @@ def check():
                     if logged_at >= int(started_at):
                         percent = int(pct_str)
                         counts = logged_counts
+                        # Steam's percentage can disagree with the reported replay counts.
+                        count_match = re.fullmatch(r"\s*(\d+)\s*/\s*(\d+)\s*", counts)
+                        if count_match:
+                            completed, total = map(int, count_match.groups())
+                            if total > 0:
+                                percent = min(100, completed * 100 // total)
                         break
         except Exception:
             pass

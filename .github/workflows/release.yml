@@ -1,0 +1,53 @@
+name: Release widget
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      PACKAGE_FILE: org.kde.plasma.steamshaders.plasmoid
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Test shader helper
+        run: python3 -m unittest discover -s tests -p test_shaders.py -v
+
+      - name: Build package
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from zipfile import ZipFile, ZIP_DEFLATED
+
+          version = json.loads(Path("metadata.json").read_text())["KPlugin"]["Version"]
+          if os.environ["GITHUB_REF_NAME"] != f"v{version}":
+              raise SystemExit("Release tag must match metadata.json version")
+
+          files = [Path("metadata.json"), Path("LICENSE")]
+          files += sorted(path for path in Path("contents").rglob("*")
+                          if path.is_file() and "__pycache__" not in path.parts
+                          and path.suffix != ".pyc")
+          with ZipFile(os.environ["PACKAGE_FILE"], "w", ZIP_DEFLATED) as package:
+              for path in files:
+                  package.write(path, path.as_posix())
+          with ZipFile(os.environ["PACKAGE_FILE"]) as package:
+              assert package.testzip() is None
+              assert {"metadata.json", "contents/ui/main.qml",
+                      "contents/scripts/check_shaders.py"} <= set(package.namelist())
+          PY
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release create "$GITHUB_REF_NAME" "$PACKAGE_FILE" --verify-tag --generate-notes

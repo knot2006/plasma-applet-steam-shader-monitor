@@ -69,6 +69,22 @@ class ShaderTests(unittest.TestCase):
         info = helper.check()
         self.assertEqual((info["percent"], info["counts"]), (7, ""))
 
+    def test_percentage_uses_counts_instead_of_logged_percentage(self):
+        for counts, expected in (("30474/2835611", 1), ("0/2815251", 0),
+                                 (" 42 / 100 ", 42), ("999/1000", 99),
+                                 ("100/100", 100), ("101/100", 100)):
+            with self.subTest(counts=counts):
+                self.write_steam(f"[2026-10-26 12:00:01] Still replaying 222 (50%, {counts}).\n")
+                info = helper.check()
+                self.assertEqual((info["percent"], info["status"], info["counts"]),
+                                 (expected, f"{expected}%", counts.lstrip()))
+
+    def test_unusable_counts_fall_back_to_logged_percentage(self):
+        for counts in ("0/0", "unknown", "42/100 extra"):
+            with self.subTest(counts=counts):
+                self.write_steam(f"[2026-10-26 12:00:01] Still replaying 222 (7%, {counts}).\n")
+                self.assertEqual(helper.check()["percent"], 7)
+
     def test_unreadable_process_start_does_not_trust_old_progress(self):
         self.write_steam("[2026-10-26 12:00:01] Still replaying 222 (100%, 100/100).\n")
         helper.process_start_time.return_value = None

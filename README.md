@@ -39,6 +39,8 @@ When Steam downloads Vulkan shader pre-caching packages, it processes and compil
   - Active CPU thread count allocated to Fossilize
 - **Lightweight & Efficient:** Pure QML frontend calling a fast (~30ms) Python helper that inspects Steam's local logs and process table without CPU overhead.
 
+Completion is calculated from the completed/total replay counts when available, because Steam's logged percentage can disagree with them. It uses whole percentages rounded down and falls back to Steam's percentage when counts are unavailable. Steam can revise the total during replay, so the percentage is not an estimate of time remaining.
+
 ---
 
 ## Requirements
@@ -111,6 +113,24 @@ if os.path.exists("/tmp/steam_shader_mock.json"):
 ```
 
 ---
+
+## Releases
+
+The GitHub Actions release workflow tests the shader helper, builds an installable `.plasmoid` package, and publishes it as a GitHub release whenever a `v*` tag is pushed. The tag must match `KPlugin.Version` in `metadata.json`. The workflow uses GitHub's built-in token; no additional secrets are required.
+
+For example, after setting the version to `1.2` and committing the release changes:
+
+```bash
+git push origin main
+git tag v1.2
+git push origin v1.2
+```
+
+Download `org.kde.plasma.steamshaders.plasmoid` from the resulting [GitHub release](https://github.com/knot2006/plasma-applet-steam-shader-monitor/releases), then upload it to the Files section of the existing [KDE Store listing](https://store.kde.org/p/2379614) and set its version to match.
+
+KDE Store publishing remains manual: automatic uploads are not currently supported, according to [OpenDesktop maintainers](https://forum.opendesktop.org/t/openhv/21070), and an official CI/CD publishing interface is still being [requested on KDE Discuss](https://discuss.kde.org/t/proposal-official-ci-cd-publishing-workflow-for-kde-store-opendesktop/50377). A GitHub release does not automatically update the Store listing.
+
+The release workflow runs the helper tests. Run the full suite locally for the headless KDE QML checks, which need PyQt6 and KDE modules.
 
 ## Development checks
 
